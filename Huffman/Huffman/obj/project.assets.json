@@ -8,20 +8,27 @@
     ".NETCoreApp,Version=v3.1": []
   },
   "packageFolders": {
-    "C:\\Users\\llaaj\\.nuget\\packages\\": {}
+    "C:\\Users\\edanP\\.nuget\\packages\\": {},
+    "C:\\Microsoft\\Xamarin\\NuGet\\": {},
+    "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\llaaj\\Documents\\Lab3_ED2\\Huffman\\Huffman\\Huffman.csproj",
+      "projectUniqueName": "C:\\GitHub\\Lab3_ED2\\Huffman\\Huffman\\Huffman.csproj",
       "projectName": "Huffman",
-      "projectPath": "C:\\Users\\llaaj\\Documents\\Lab3_ED2\\Huffman\\Huffman\\Huffman.csproj",
-      "packagesPath": "C:\\Users\\llaaj\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\llaaj\\Documents\\Lab3_ED2\\Huffman\\Huffman\\obj\\",
+      "projectPath": "C:\\GitHub\\Lab3_ED2\\Huffman\\Huffman\\Huffman.csproj",
+      "packagesPath": "C:\\Users\\edanP\\.nuget\\packages\\",
+      "outputPath": "C:\\GitHub\\Lab3_ED2\\Huffman\\Huffman\\obj\\",
       "projectStyle": "PackageReference",
+      "fallbackFolders": [
+        "C:\\Microsoft\\Xamarin\\NuGet\\",
+        "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
+      ],
       "configFilePaths": [
-        "C:\\Users\\llaaj\\AppData\\Roaming\\NuGet\\NuGet.Config",
-        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+        "C:\\Users\\edanP\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config",
+        "C:\\Program Files (x86)\\NuGet\\Config\\Xamarin.Offline.config"
       ],
       "originalTargetFrameworks": [
         "netcoreapp3.1"
