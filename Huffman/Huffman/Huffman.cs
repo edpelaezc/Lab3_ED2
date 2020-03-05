@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace Huffman
 {
-	public class Node
+	public class Node : IComparable
 	{
 		public char ch;
 		public int freq;
@@ -25,9 +25,18 @@ namespace Huffman
 			this.Left = left;
 			this.Right = right;
 		}
+
+		public int CompareTo(object obj)
+		{
+			var iobj = (Node)obj;
+			return freq.CompareTo(iobj.freq);
+		}
 	}
 	public class Huffman
 	{
+		public Dictionary<char, string> huffCode = new Dictionary<char, string>();
+		public Node root;
+
 		public void encode(Node root, string str, Dictionary<char, string> huffman)
 		{
 			if (root == null)
@@ -44,16 +53,15 @@ namespace Huffman
 			encode(root.Right, str + "1", huffman);
 		}
 
-		public void decode(Node root, int index, string str)
+		public void decode(Node root, ref int index, string str, ref string result)
 		{
-			str = "";
 			if (root == null)
 			{
 				return;
 			}
 			if (root.Left == null && root.Right == null)
 			{
-				str += root.ch.ToString();
+				result += root.ch.ToString();
 				return;
 			}
 
@@ -61,11 +69,11 @@ namespace Huffman
 
 			if (str[index] == '0')
 			{
-				decode(root.Left, index, str);
+				decode(root.Left, ref index, str, ref result);
 			}
 			else
 			{
-				decode(root.Right, index, str);
+				decode(root.Right, ref index, str, ref result);
 			}
 		}
 
@@ -79,40 +87,35 @@ namespace Huffman
 				{
 					freq.Add(text[i], 0);
 				}
-				freq.Add(text[i], freq[text[i]] + 1);
+				freq.TryGetValue(text[i], out int x);
+				freq[text[i]] = x + 1;
 			}
 
-			SortedList<int, Node> pList = new SortedList<int, Node>();
+			List<Node> pList = new List<Node>();
 
 			for (int i = 0; i < freq.Count; i++)
 			{
 				KeyValuePair<char, int> pair = freq.ElementAt(i);
-				pList.Add(pair.Value, new Node(pair.Key, pair.Value, null, null));
+				pList.Add(new Node(pair.Key, pair.Value, null, null));
 			}
 
-			
-
+			pList.Sort();
 			while (pList.Count != 1)
 			{
-				KeyValuePair<int, Node> pair = pList.ElementAt(pList.Count - 1);
-				pList.RemoveAt(pList.Count - 1);
-				Node left = pair.Value;
+				Node pair = pList[0];
+				pList.RemoveAt(0);
+				Node left = pair;
 
-				pair = pList.ElementAt(pList.Count - 1);
-				pList.RemoveAt(pList.Count - 1);
-				Node right = pair.Value;
+				pair = pList.ElementAt(0);
+				pList.RemoveAt(0);
+				Node right = pair;
 
 				int sum = left.freq + right.freq;
-				pList.Add(sum, new Node('0', sum, left, right));
-
+				pList.Add(new Node('\0', sum, left, right));
+				pList.Sort();
 			}
-			KeyValuePair<int, Node> root = pList.ElementAt(pList.Count - 1);
-			Node nRoot = root.Value;
-
-			Dictionary<char, string> huffCode = new Dictionary<char, string>();
-			encode(nRoot, "", huffCode);
-
-
-		}	
+			this.root = pList.ElementAt(0);
+			encode(this.root, "", huffCode);
+		}
 	}
 }
