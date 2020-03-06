@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -53,7 +54,14 @@ namespace Huffman
 			encode(root.Right, str + "1", huffman);
 		}
 
-		public void decode(Node root, ref int index, string str, ref string result)
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="root"></param>
+		/// <param name="index"></param>
+		/// <param name="str">BitArray str = new BitArray(byte[])</param>
+		/// <param name="result"></param>
+		public void decode(Node root, ref int index, BitArray str, ref string result)
 		{
 			if (root == null)
 			{
@@ -67,7 +75,7 @@ namespace Huffman
 
 			index++;
 
-			if (str[index] == '0')
+			if (str[index] == false)
 			{
 				decode(root.Left, ref index, str, ref result);
 			}
