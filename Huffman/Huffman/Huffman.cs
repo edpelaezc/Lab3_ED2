@@ -7,20 +7,20 @@ namespace Huffman
 {
 	public class Node : IComparable
 	{
-		public char ch;
+		public byte byt;
 		public int freq;
 		public Node Left = null;
 		public Node Right = null;
 
-		Node(char ch, int freq)
+		Node(byte ch, int freq)
 		{
-			this.ch = ch;
+			this.byt = ch;
 			this.freq = freq;
 		}
 
-		public Node(char ch, int freq, Node left, Node right)
+		public Node(byte ch, int freq, Node left, Node right)
 		{
-			this.ch = ch;
+			this.byt = ch;
 			this.freq = freq;
 			this.Left = left;
 			this.Right = right;
@@ -34,10 +34,10 @@ namespace Huffman
 	}
 	public class Huffman
 	{
-		public Dictionary<char, string> huffCode = new Dictionary<char, string>();
+		public Dictionary<byte, string> huffCode = new Dictionary<byte, string>();
 		public Node root;
 
-		public void encode(Node root, string str, Dictionary<char, string> huffman)
+		public void encode(Node root, string str, Dictionary<byte, string> huffman)
 		{
 			if (root == null)
 			{
@@ -46,7 +46,7 @@ namespace Huffman
 
 			if (root.Left == null && root.Right == null)
 			{
-				huffman.Add(root.ch, str);
+				huffman.Add(root.byt, str);
 			}
 
 			encode(root.Left, str + "0", huffman);
@@ -61,7 +61,7 @@ namespace Huffman
 			}
 			if (root.Left == null && root.Right == null)
 			{
-				result += root.ch.ToString();
+				result += root.byt.ToString();
 				return;
 			}
 
@@ -77,9 +77,9 @@ namespace Huffman
 			}
 		}
 
-		public void BuildHuffman(string text)
+		public void BuildHuffman(byte[] text)
 		{
-			Dictionary<char, int> freq = new Dictionary<char, int>();
+			Dictionary<byte, int> freq = new Dictionary<byte, int>();
 
 			for (int i = 0; i < text.Length; i++)
 			{
@@ -95,7 +95,7 @@ namespace Huffman
 
 			for (int i = 0; i < freq.Count; i++)
 			{
-				KeyValuePair<char, int> pair = freq.ElementAt(i);
+				KeyValuePair<byte, int> pair = freq.ElementAt(i);
 				pList.Add(new Node(pair.Key, pair.Value, null, null));
 			}
 
@@ -111,7 +111,7 @@ namespace Huffman
 				Node right = pair;
 
 				int sum = left.freq + right.freq;
-				pList.Add(new Node('\0', sum, left, right));
+				pList.Add(new Node(0, sum, left, right));
 				pList.Sort();
 			}
 			this.root = pList.ElementAt(0);
