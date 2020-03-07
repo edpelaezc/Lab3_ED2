@@ -41,12 +41,6 @@ namespace Huffman.Controllers
             return result.ToString();            
         }
 
-        // PUT: api/compress/5
-        [HttpPut("{id}")]
-        public void Put(int id, [FromBody] string value)
-        {
-        }
-
         // DELETE: api/ApiWithActions/5
         [HttpDelete("{id}")]
         public void Delete(int id)
