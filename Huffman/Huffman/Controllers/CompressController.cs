@@ -2,38 +2,55 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
+using System.ComponentModel.DataAnnotations;
+using System.IO;
+using System.Text;
 
 namespace Huffman.Controllers
 {
-	[ApiController]
-	[Route("[controller]")]
-	public class CompressController : ControllerBase
-	{
-		private static readonly string[] Summaries = new[]
-		{
-			"Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-		};
+    [Route("[controller]")]
+    [ApiController]
+    public class compressController : ControllerBase
+    {
+        // GET: api/compress
+        [HttpGet]
+        public IEnumerable<string> Get()
+        {
+            return new string[] { "value1", "value2" };
+        }
 
-		private readonly ILogger<CompressController> _logger;
+        // GET: api/compress/5
+        [HttpGet("{id}", Name = "Get")]
+        public string Get(string id)
+        {
+            return "value";
+        }
 
-		public CompressController(ILogger<CompressController> logger)
-		{			
-			_logger = logger;
-		}
+        // POST: api/compress
+        [HttpPost("{nombre}")]
+        public string Post([FromForm(Name = "file")] IFormFile file, string nombre)
+        {
+            var result = new StringBuilder();
+            using (var reader = new StreamReader(file.OpenReadStream()))
+            {
+                while (reader.Peek() >= 0)
+                    result.AppendLine(reader.ReadLine());
+            }
+            return result.ToString();            
+        }
 
-		[HttpGet]
-		public IEnumerable<WeatherForecast> Get()
-		{
-			var rng = new Random();
-			return Enumerable.Range(1, 5).Select(index => new WeatherForecast
-			{
-				Date = DateTime.Now.AddDays(index),
-				TemperatureC = rng.Next(-20, 55),
-				Summary = Summaries[rng.Next(Summaries.Length)]
-			})
-			.ToArray();
-		}
-	}
+        // PUT: api/compress/5
+        [HttpPut("{id}")]
+        public void Put(int id, [FromBody] string value)
+        {
+        }
+
+        // DELETE: api/ApiWithActions/5
+        [HttpDelete("{id}")]
+        public void Delete(int id)
+        {
+        }
+    }
 }
