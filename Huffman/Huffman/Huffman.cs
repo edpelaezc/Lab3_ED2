@@ -1,34 +1,44 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
 namespace Huffman
 {
-	public class Node
+	public class Node : IComparable
 	{
-		public char ch;
+		public byte byt;
 		public int freq;
 		public Node Left = null;
 		public Node Right = null;
 
-		Node(char ch, int freq)
+		Node(byte ch, int freq)
 		{
-			this.ch = ch;
+			this.byt = ch;
 			this.freq = freq;
 		}
 
-		public Node(char ch, int freq, Node left, Node right)
+		public Node(byte ch, int freq, Node left, Node right)
 		{
-			this.ch = ch;
+			this.byt = ch;
 			this.freq = freq;
 			this.Left = left;
 			this.Right = right;
 		}
+
+		public int CompareTo(object obj)
+		{
+			var iobj = (Node)obj;
+			return freq.CompareTo(iobj.freq);
+		}
 	}
 	public class Huffman
 	{
-		public void encode(Node root, string str, Dictionary<char, string> huffman)
+		public Dictionary<byte, string> huffCode = new Dictionary<byte, string>();
+		public Node root;
+
+		public void encode(Node root, string str, Dictionary<byte, string> huffman)
 		{
 			if (root == null)
 			{
@@ -37,36 +47,83 @@ namespace Huffman
 
 			if (root.Left == null && root.Right == null)
 			{
-				huffman.Add(root.ch, str);
+				huffman.Add(root.byt, str);
 			}
 
 			encode(root.Left, str + "0", huffman);
 			encode(root.Right, str + "1", huffman);
 		}
 
-		public void decode(Node root, int index, string str)
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="root"></param>
+		/// <param name="index"></param>
+		/// <param name="str">BitArray str = new BitArray(byte[])</param>
+		/// <param name="result"></param>
+		public void decode(Node root, ref int index, BitArray str, ref string result)
 		{
-			str = "";
 			if (root == null)
 			{
 				return;
 			}
 			if (root.Left == null && root.Right == null)
 			{
-				str += root.ch.ToString();
+				result += root.byt.ToString();
 				return;
 			}
 
 			index++;
 
-			if (str[index] == '0')
+			if (str[index] == false)
 			{
-				decode(root.Left, index, str);
+				decode(root.Left, ref index, str, ref result);
 			}
 			else
 			{
-				decode(root.Right, index, str);
+				decode(root.Right, ref index, str, ref result);
 			}
+		}
+
+		public void BuildHuffman(byte[] text)
+		{
+			Dictionary<byte, int> freq = new Dictionary<byte, int>();
+
+			for (int i = 0; i < text.Length; i++)
+			{
+				if (!freq.ContainsKey(text[i]))
+				{
+					freq.Add(text[i], 0);
+				}
+				freq.TryGetValue(text[i], out int x);
+				freq[text[i]] = x + 1;
+			}
+
+			List<Node> pList = new List<Node>();
+
+			for (int i = 0; i < freq.Count; i++)
+			{
+				KeyValuePair<byte, int> pair = freq.ElementAt(i);
+				pList.Add(new Node(pair.Key, pair.Value, null, null));
+			}
+
+			pList.Sort();
+			while (pList.Count != 1)
+			{
+				Node pair = pList[0];
+				pList.RemoveAt(0);
+				Node left = pair;
+
+				pair = pList.ElementAt(0);
+				pList.RemoveAt(0);
+				Node right = pair;
+
+				int sum = left.freq + right.freq;
+				pList.Add(new Node(0, sum, left, right));
+				pList.Sort();
+			}
+			this.root = pList.ElementAt(0);
+			encode(this.root, "", huffCode);
 		}
 	}
 }
