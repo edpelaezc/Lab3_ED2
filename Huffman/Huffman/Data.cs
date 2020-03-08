@@ -17,6 +17,6 @@ namespace Huffman
 			}
 		}
 
-		List<CompressionsCollection> archivos = new List<CompressionsCollection>();
+		public List<CompressionsCollection> archivos = new List<CompressionsCollection>();
 	}
 }

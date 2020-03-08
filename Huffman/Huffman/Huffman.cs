@@ -86,7 +86,7 @@ namespace Huffman
 			}
 		}
 
-		public void BuildHuffman(byte[] text, string newName)
+		public void BuildHuffman(byte[] text, string newName, string name)
 		{
 			Dictionary<byte, int> freq = new Dictionary<byte, int>();
 
@@ -138,7 +138,10 @@ namespace Huffman
 					writer.Write(huffCode[item]);
 				}
 			}
-			
+
+
+			CompressionsCollection newElement = new CompressionsCollection(name, fullPath, 0, 0, 0);
+			Data.Instance.archivos.Insert(0, newElement);
 			Console.WriteLine("OK");
 		}
 	}
