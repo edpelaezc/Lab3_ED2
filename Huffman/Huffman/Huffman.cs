@@ -59,39 +59,7 @@ namespace Huffman
 			encode(root.Right, str + "1", huffman);
 		}
 
-		/// <summary>
-		/// 
-		/// </summary>
-		/// <param name="root"></param>
-		/// <param name="index"></param>
-		/// <param name="str">BitArray str = new BitArray(byte[])</param>
-		/// <param name="result"></param>
-		public void decode(Node root, ref int index, BitArray str, ref string result)
-		{
-			if (root == null)
-			{
-				return;
-			}
-			if (root.Left == null && root.Right == null)
-			{
-				byte[] toStr = { root.byt };
-				result += ByteGenerator.ConvertToString(toStr);
-				return;
-			}
-
-			index++;
-
-			if (str[index] == false)
-			{
-				decode(root.Left, ref index, str, ref result);
-			}
-			else
-			{
-				decode(root.Right, ref index, str, ref result);
-			}
-		}
-
-		public void BuildHuffman(byte[] text)
+		public void BuildHuffman(byte[] text, string newName)
 		{
 			Dictionary<byte, int> freq = new Dictionary<byte, int>();
 
@@ -114,6 +82,10 @@ namespace Huffman
 			}
 
 			pList.Sort();
+			string folder = @"C:\Compressions\";
+			string fullPath = folder + newName;
+			WriteTree(pList, fullPath);
+
 			while (pList.Count != 1)
 			{
 				Node pair = pList[0];
@@ -140,9 +112,8 @@ namespace Huffman
 			{
 				KeyValuePair<byte, int> pair = freq.ElementAt(i);
 				pList.Add(new Node(pair.Key, pair.Value, null, null));
-			}
+			}				
 
-			pList.Sort();
 			while (pList.Count != 1)
 			{
 				Node pair = pList[0];
@@ -157,8 +128,9 @@ namespace Huffman
 				pList.Add(new Node(0, sum, left, right));
 				pList.Sort();
 			}
-			this.root = pList.ElementAt(0);
+			this.root = pList.ElementAt(0);			
 		}
+
 
 		public void WriteFile(byte[] text, string newName, string name)
 		{
@@ -175,21 +147,28 @@ namespace Huffman
 				content += huffCode[item];
 			}
 
-			WriteTree(this.root, fullPath);
-
-			using (FileStream writer = new FileStream(fullPath, FileMode.Append))
+			using (FileStream writer = new FileStream(fullPath, FileMode.Open))
 			{
 				byte[] ToWrite = ConvertToByte(content);
-				foreach (var item in ToWrite)
+				for (int i = 0; i < ToWrite.Length; i++)
 				{
-					
-					writer.WriteByte(item);
-					
+					byte[] temp = { ToWrite[i] };
+					writer.Seek(0, SeekOrigin.End);
+					writer.Write(temp, 0, 1);
 				}
 			}
 
 			CompressionsCollection newElement = new CompressionsCollection(name, fullPath, 0, 0, 0);
 			Data.Instance.archivos.Insert(0, newElement);
+		}
+
+		byte[] ConvertToByte(string b)
+		{
+			BitArray bits = new BitArray(b.Select(x => x == '1').ToArray());
+
+			byte[] ret = ToByteArray(bits);
+
+			return ret;
 		}
 
 		byte[] ToByteArray(BitArray bits)
@@ -216,16 +195,36 @@ namespace Huffman
 			return bytes;
 		}
 
-		byte[] ConvertToByte(string b)
+		void WriteTree(List<Node> pList, string fullpath)
 		{
-			BitArray bits = new BitArray(b.Select(x => x == '1').ToArray());
-
-			byte[] ret = ToByteArray(bits);
-
-			return ret;
+			foreach (var item in pList)
+			{
+				byte[] temp = { item.byt };
+				using (FileStream writer = new FileStream(fullpath, FileMode.OpenOrCreate))
+				{
+					writer.Seek(0, SeekOrigin.End);
+					if (ByteGenerator.ConvertToString(temp) == '\n'.ToString())
+					{
+						writer.Write(ByteGenerator.ConvertToBytes("NTR"), 0, 3);
+					}
+					else if (ByteGenerator.ConvertToString(temp) == '\r'.ToString())
+					{
+						writer.Write(ByteGenerator.ConvertToBytes("NDL"), 0, 3);
+					}
+					else
+					{
+						writer.Write(temp, 0, 1);
+					}
+					writer.Seek(0, SeekOrigin.End);
+					writer.Write(ByteGenerator.ConvertToBytes(item.freq.ToString()), 0, item.freq.ToString().Length);
+					writer.Seek(0, SeekOrigin.End);
+					writer.Write(ByteGenerator.ConvertToBytes("~"), 0, 1);
+				}
+			}
 		}
 
-		void WriteTree(Node root, string fullpath)
+
+		public void decode(Node root, ref int index, BitArray str, ref string result)
 		{
 			if (root == null)
 			{
@@ -233,34 +232,29 @@ namespace Huffman
 			}
 			if (root.Left == null && root.Right == null)
 			{
-				byte[] temp = { root.byt };
-				using (FileStream writer = new FileStream(fullpath, FileMode.Append))
-				{
-					if (ByteGenerator.ConvertToString(temp) == '\n'.ToString())
-					{
-						writer.Write(ByteGenerator.ConvertToBytes("NTR"));
-					}
-					else if (ByteGenerator.ConvertToString(temp) == '\r'.ToString())
-					{
-						writer.Write(ByteGenerator.ConvertToBytes("NDL"));
-					}
-					else
-					{
-						writer.WriteByte(root.byt);
-					}				
-					writer.Write(ByteGenerator.ConvertToBytes(root.freq.ToString()));
-					writer.Write(ByteGenerator.ConvertToBytes("Ђ"));
-				}
+				byte[] toStr = { root.byt };
+				result += ByteGenerator.ConvertToString(toStr);
+				return;
 			}
 
-			WriteTree(root.Left, fullpath);
-			WriteTree(root.Right, fullpath);
+			index++;
+
+			if (str[index] == false)
+			{
+				decode(root.Left, ref index, str, ref result);
+			}
+			else
+			{
+				decode(root.Right, ref index, str, ref result);
+			}
 		}
 
 		public void DecodeFile(byte[] text, string newName, string name)
 		{
 			string txt = ByteGenerator.ConvertToString(text);
-			string[] nodes = txt.Split('Ђ');
+			string[] nodes = txt.Split('~');
+
+			int start = nodes.Length - 1;
 
 			Dictionary<byte, int> freq = new Dictionary<byte, int>();
 
@@ -277,6 +271,7 @@ namespace Huffman
 					for (int j = 1; j < val.Length; j++)
 					{
 						integer += val[j];
+						start++;
 					}
 				}
 				else
@@ -290,10 +285,10 @@ namespace Huffman
 						else
 						{
 							integer += val[j];
+							start++;
 						}
 					}
 				}
-				
 
 				byte[] bt;
 				if (character == "NTR")
@@ -308,6 +303,7 @@ namespace Huffman
 				{
 					bt = ByteGenerator.ConvertToBytes(character.ToString());
 				}
+				start += character.Length;
 
 				if (!freq.ContainsKey(bt[0]))
 				{
@@ -315,8 +311,9 @@ namespace Huffman
 				}				
 			}
 
-			BuildHuffman(freq);			
-			BitArray result = ToBitArray(ByteGenerator.ConvertToBytes(nodes[nodes.Length - 1]));
+			BuildHuffman(freq);
+
+			BitArray result = ToBitArray(text.Skip(start).ToArray());
 			int index = -1;
 			string decoded = "";
 			while (index < result.Length - 2)

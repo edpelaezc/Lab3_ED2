@@ -26,15 +26,23 @@ namespace Huffman.Controllers
         public void Get([FromForm(Name = "file")] IFormFile file, string name)
         {
             Huffman decompressMethod = new Huffman();
-            var result = new StringBuilder();
-            using (StreamReader sr = new StreamReader(file.OpenReadStream()))
-            {
-                while (sr.Peek() >= 0)
-                    result.AppendLine(sr.ReadLine());
-            }
+            string result = "";
 
-            byte[] textInBytes = ByteGenerator.ConvertToBytes(result.ToString());
-            decompressMethod.DecodeFile(textInBytes, name, file.FileName);
+            string folder = @"C:\Compressions\";
+            string fullPath = folder + file.FileName;
+
+            byte[] txt = new byte[file.Length];
+            using (FileStream fs = new FileStream(fullPath, FileMode.Open))
+            {                
+                int count;                            // actual number of bytes read
+                int sum = 0;                          // total number of bytes read
+
+                // read until Read method returns 0 (end of the stream has been reached)
+                while ((count = fs.Read(txt, sum, txt.Length - sum)) > 0)
+                    sum += count;  // sum is a buffer offset for next reading
+            }
+          
+            decompressMethod.DecodeFile(txt, name, file.FileName);
         }
 
         // POST: api/compress
@@ -50,7 +58,7 @@ namespace Huffman.Controllers
             }
 
             byte[] textInBytes = Encoding.UTF8.GetBytes(result.ToString());
-            compressMethods.BuildHuffman(textInBytes);
+            compressMethods.BuildHuffman(textInBytes, name);
             compressMethods.WriteFile(textInBytes, name, file.FileName);
         }
 
