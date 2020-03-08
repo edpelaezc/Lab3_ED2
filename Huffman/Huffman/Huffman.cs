@@ -141,8 +141,7 @@ namespace Huffman
 
 
 			CompressionsCollection newElement = new CompressionsCollection(name, fullPath, 0, 0, 0);
-			Data.Instance.archivos.Insert(0, newElement);
-			Console.WriteLine("OK");
+			Data.Instance.archivos.Insert(0, newElement);			
 		}
 	}
 }

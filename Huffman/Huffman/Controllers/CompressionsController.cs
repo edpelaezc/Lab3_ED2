@@ -13,9 +13,9 @@ namespace Huffman.Controllers
     {
         // GET: api/Compressions
         [HttpGet]
-        public IEnumerable<string> Get()
+        public IEnumerable<CompressionsCollection> Get()
         {
-            return new string[] { "test", "huffman" };
+            return Data.Instance.archivos;
         }
 
 

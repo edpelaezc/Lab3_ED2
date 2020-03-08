@@ -41,8 +41,7 @@ namespace Huffman.Controllers
             }
 
             byte[] textInBytes = Encoding.UTF8.GetBytes(result.ToString());
-            compressMethods.BuildHuffman(textInBytes, name, file.FileName);
-            Console.WriteLine();
+            compressMethods.BuildHuffman(textInBytes, name, file.FileName);            
         }
 
         // DELETE: api/ApiWithActions/5
