@@ -38,7 +38,8 @@ namespace Huffman
 	{
 		public Dictionary<byte, string> huffCode = new Dictionary<byte, string>();
 		public Node root;
-
+		private bool[] bitF = { false };
+		private bool[] bitT = { true };
 		public void encode(Node root, string str, Dictionary<byte, string> huffman)
 		{
 			if (root == null)
@@ -50,6 +51,8 @@ namespace Huffman
 			{
 				huffman.Add(root.byt, str);
 			}
+
+			BitArray bit = new BitArray(bitF);
 
 			encode(root.Left, str + "0", huffman);
 			encode(root.Right, str + "1", huffman);
@@ -129,17 +132,39 @@ namespace Huffman
 			//escribir archivo binario 
 			string folder = @"C:\Compressions\";
 			string fullPath = folder + newName;
-			
 
-			using (StreamWriter writer = new StreamWriter(fullPath))
+			// crear el directorio
+			DirectoryInfo directory = Directory.CreateDirectory(folder);
+
+			string content = "";
+			foreach (var item in text)
 			{
-				foreach (var item in text)
+				content += huffCode[item];
+			}
+
+			using (FileStream writer = new FileStream(fullPath, FileMode.OpenOrCreate))
+			{
+				byte[] ToWrite = ConvertToByte(content);
+				foreach (var item in ToWrite)
 				{
-					writer.Write(huffCode[item]);
+					if (item != 0)
+					{
+						writer.WriteByte(item);
+					}					
 				}
 			}
 			
 			Console.WriteLine("OK");
+		}
+
+		byte[] ConvertToByte(string b)
+		{
+			BitArray bits = new BitArray(b.ToList().ConvertAll<bool>(x => x == '1').ToArray());
+
+			byte[] ret = new byte[bits.Length];
+			bits.CopyTo(ret, 0);
+
+			return ret;
 		}
 	}
 }
