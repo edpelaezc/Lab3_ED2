@@ -22,10 +22,19 @@ namespace Huffman.Controllers
         }
 
         // GET: api/compress/5
-        [HttpGet("{id}", Name = "Get")]
-        public string Get(string id)
+        [HttpGet("{name}")]
+        public void Get([FromForm(Name = "file")] IFormFile file, string name)
         {
-            return "value";
+            Huffman decompressMethod = new Huffman();
+            var result = new StringBuilder();
+            using (StreamReader sr = new StreamReader(file.OpenReadStream()))
+            {
+                while (sr.Peek() >= 0)
+                    result.AppendLine(sr.ReadLine());
+            }
+
+            byte[] textInBytes = ByteGenerator.ConvertToBytes(result.ToString());
+            decompressMethod.DecodeFile(textInBytes, name, file.FileName);
         }
 
         // POST: api/compress
@@ -41,7 +50,8 @@ namespace Huffman.Controllers
             }
 
             byte[] textInBytes = Encoding.UTF8.GetBytes(result.ToString());
-            compressMethods.BuildHuffman(textInBytes, name, file.FileName);            
+            compressMethods.BuildHuffman(textInBytes);
+            compressMethods.WriteFile(textInBytes, name, file.FileName);
         }
 
         // DELETE: api/ApiWithActions/5
