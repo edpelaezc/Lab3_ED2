@@ -21,31 +21,12 @@ namespace Huffman.Controllers
             return new string[] { "value1", "value2" };
         }
 
-        // GET: api/compress/5
-        [HttpGet("{name}")]
-        public void Get([FromForm(Name = "file")] IFormFile file, string name)
-        {
-            Huffman decompressMethod = new Huffman();
-            string result = "";
-
-            string folder = @"C:\Compressions\";
-            string fullPath = folder + file.FileName;
-
-            byte[] txt = new byte[file.Length];
-            using (FileStream fs = new FileStream(fullPath, FileMode.Open))
-            {                
-                int count;                            // actual number of bytes read
-                int sum = 0;                          // total number of bytes read
-
-                // read until Read method returns 0 (end of the stream has been reached)
-                while ((count = fs.Read(txt, sum, txt.Length - sum)) > 0)
-                    sum += count;  // sum is a buffer offset for next reading
-            }
-          
-            decompressMethod.DecodeFile(txt, name, file.FileName);
-        }
-
-        // POST: api/compress
+        /// <summary>
+        /// Recibe un archivo .txt que será comprimido por medio del algoritmo "Huffman" y lo guardará con el nombre especificado.
+        /// </summary>
+        /// <param name="file">Archivo .txt</param>
+        /// <param name="name">Nombre especificado para guardar el archivo</param>
+        // POST: api/compress/fileName
         [HttpPost("{name}")]
         public void Post([FromForm(Name = "file")] IFormFile file, string name)
         {

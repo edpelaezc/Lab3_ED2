@@ -101,7 +101,7 @@ namespace Huffman
 				pList.Sort();
 			}
 			this.root = pList.ElementAt(0);
-			encode(this.root, "", huffCode);					
+			encode(this.root, "", huffCode);
 		}
 
 		public void BuildHuffman(Dictionary<byte, int> freq)
@@ -112,7 +112,7 @@ namespace Huffman
 			{
 				KeyValuePair<byte, int> pair = freq.ElementAt(i);
 				pList.Add(new Node(pair.Key, pair.Value, null, null));
-			}				
+			}
 
 			while (pList.Count != 1)
 			{
@@ -128,7 +128,7 @@ namespace Huffman
 				pList.Add(new Node(0, sum, left, right));
 				pList.Sort();
 			}
-			this.root = pList.ElementAt(0);			
+			this.root = pList.ElementAt(0);
 		}
 
 
@@ -147,18 +147,25 @@ namespace Huffman
 				content += huffCode[item];
 			}
 
+			byte[] compressed = ConvertToByte(content);
 			using (FileStream writer = new FileStream(fullPath, FileMode.Open))
 			{
 				byte[] ToWrite = ConvertToByte(content);
 				for (int i = 0; i < ToWrite.Length; i++)
 				{
-					byte[] temp = { ToWrite[i] };
+					byte[] temp = { ToWrite[i] };				
 					writer.Seek(0, SeekOrigin.End);
 					writer.Write(temp, 0, 1);
 				}
 			}
 
-			CompressionsCollection newElement = new CompressionsCollection(name, fullPath, 0, 0, 0);
+			double compressedBytes = compressed.Length;
+			double originalBytes = text.Length;
+			double rc = compressedBytes / originalBytes;
+			double fc = originalBytes / compressedBytes;
+			double percentage = rc * 100;
+			
+			CompressionsCollection newElement = new CompressionsCollection(name, fullPath, rc, fc, percentage.ToString("N2") + "%");
 			Data.Instance.archivos.Insert(0, newElement);
 		}
 
@@ -308,13 +315,13 @@ namespace Huffman
 				if (!freq.ContainsKey(bt[0]))
 				{
 					freq.Add(bt[0], Convert.ToInt32(integer));
-				}				
+				}
 			}
 
 			BuildHuffman(freq);
 
 			BitArray result = ToBitArray(text.Skip(start).ToArray());
-			int index = -1;
+			int index = 1;
 			string decoded = "";
 			while (index < result.Length - 2)
 			{
@@ -331,7 +338,7 @@ namespace Huffman
 		}
 
 		private BitArray ToBitArray(byte[] bytes)
-		{			
+		{
 			string strAllbin = "";
 
 			for (int i = 0; i < bytes.Length; i++)
