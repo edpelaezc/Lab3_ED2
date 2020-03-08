@@ -13,8 +13,7 @@ namespace Huffman.Controllers
     [Route("[controller]")]
     [ApiController]
     public class compressController : ControllerBase
-    {
-        Huffman compressMethods = new Huffman();
+    {        
         // GET: api/compress
         [HttpGet]
         public IEnumerable<string> Get()
@@ -33,6 +32,7 @@ namespace Huffman.Controllers
         [HttpPost("{name}")]
         public void Post([FromForm(Name = "file")] IFormFile file, string name)
         {
+            Huffman compressMethods = new Huffman();
             var result = new StringBuilder();
             using (var reader = new StreamReader(file.OpenReadStream()))
             {
@@ -41,7 +41,7 @@ namespace Huffman.Controllers
             }
 
             byte[] textInBytes = Encoding.UTF8.GetBytes(result.ToString());
-            compressMethods.BuildHuffman(textInBytes, name);
+            compressMethods.BuildHuffman(textInBytes, name, file.FileName);            
         }
 
         // DELETE: api/ApiWithActions/5
