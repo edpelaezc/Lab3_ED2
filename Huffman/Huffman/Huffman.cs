@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using System.IO;
 
 namespace Huffman
 {
@@ -85,7 +86,7 @@ namespace Huffman
 			}
 		}
 
-		public void BuildHuffman(byte[] text)
+		public void BuildHuffman(byte[] text, string newName)
 		{
 			Dictionary<byte, int> freq = new Dictionary<byte, int>();
 
@@ -124,6 +125,21 @@ namespace Huffman
 			}
 			this.root = pList.ElementAt(0);
 			encode(this.root, "", huffCode);
+
+			//escribir archivo binario 
+			string folder = @"C:\Compressions\";
+			string fullPath = folder + newName;
+			
+
+			using (StreamWriter writer = new StreamWriter(fullPath))
+			{
+				foreach (var item in text)
+				{
+					writer.Write(huffCode[item]);
+				}
+			}
+			
+			Console.WriteLine("OK");
 		}
 	}
 }
