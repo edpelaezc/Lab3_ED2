@@ -225,7 +225,7 @@ namespace Huffman
 					writer.Seek(0, SeekOrigin.End);
 					writer.Write(ByteGenerator.ConvertToBytes(item.freq.ToString()), 0, item.freq.ToString().Length);
 					writer.Seek(0, SeekOrigin.End);
-					writer.Write(ByteGenerator.ConvertToBytes("~"), 0, 1);
+					writer.Write(ByteGenerator.ConvertToBytes("@@@"), 0, 3);
 				}
 			}
 		}
@@ -259,9 +259,9 @@ namespace Huffman
 		public void DecodeFile(byte[] text, string newName, string name)
 		{
 			string txt = ByteGenerator.ConvertToString(text);
-			string[] nodes = txt.Split('~');
+			string[] nodes = txt.Split("@@@");
 
-			int start = nodes.Length - 1;
+			int start = (nodes.Length - 1) * 3;
 
 			Dictionary<byte, int> freq = new Dictionary<byte, int>();
 
@@ -321,9 +321,9 @@ namespace Huffman
 			BuildHuffman(freq);
 
 			BitArray result = ToBitArray(text.Skip(start).ToArray());
-			int index = 1;
+			int index = -1;
 			string decoded = "";
-			while (index < result.Length - 2)
+			while (index < result.Length - 1)
 			{
 				decode(this.root, ref index, result, ref decoded);
 			}
