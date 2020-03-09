@@ -38,7 +38,7 @@ namespace Huffman.Controllers
                     result.AppendLine(reader.ReadLine());
             }
 
-            byte[] textInBytes = Encoding.UTF8.GetBytes(result.ToString());
+            byte[] textInBytes = Encoding.ASCII.GetBytes(result.ToString());
             compressMethods.BuildHuffman(textInBytes, name);
             compressMethods.WriteFile(textInBytes, name, file.FileName);
         }
