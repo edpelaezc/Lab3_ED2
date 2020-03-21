@@ -27,20 +27,33 @@ namespace Huffman.Controllers
         /// <param name="file">Archivo .txt</param>
         /// <param name="name">Nombre especificado para guardar el archivo</param>
         // POST: api/compress/fileName
-        [HttpPost("{name}")]
-        public void Post([FromForm(Name = "file")] IFormFile file, string name)
+        [HttpPost("{name}/{method}")]
+        public void Post([FromForm(Name = "file")] IFormFile file, string name, string method)
         {
-            Huffman compressMethods = new Huffman();
+            //lectura del archivo
             var result = new StringBuilder();
             using (var reader = new StreamReader(file.OpenReadStream()))
             {
                 while (reader.Peek() >= 0)
                     result.AppendLine(reader.ReadLine());
             }
-
             byte[] textInBytes = Encoding.ASCII.GetBytes(result.ToString());
-            compressMethods.BuildHuffman(textInBytes, name);
-            compressMethods.WriteFile(textInBytes, name, file.FileName);
+
+            //ejecuta según el método de compresión escogido
+            if (method.ToLower().Equals("huffman"))
+            {
+                Huffman compressMethods = new Huffman();                
+                compressMethods.BuildHuffman(textInBytes, name);
+                compressMethods.WriteFile(textInBytes, name, file.FileName);
+            }
+            else if (method.ToLower().Equals("lzw"))
+            {
+                LZW compressMethods = new LZW();
+                compressMethods.GetText(result);
+                compressMethods.InitializeDictionary(result, name);                
+                compressMethods.Compress(textInBytes, name, file.FileName);
+
+            }
         }
 
         // DELETE: api/ApiWithActions/5
