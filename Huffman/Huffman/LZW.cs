@@ -41,15 +41,14 @@ namespace Huffman
             using (FileStream writer = new FileStream(fullPath, FileMode.OpenOrCreate))
             {
                 foreach (var item in elements)
-                {
-                    byte[] ToWrite = ConvertToByte(item.ToString());
-                    for (int i = 0; i < ToWrite.Length; i++)
-                    {
-                        byte[] temp = { ToWrite[i] };
-                        writer.Seek(0, SeekOrigin.End);
-                        writer.Write(temp, 0, 1);
-                    }
-                }
+                {                    
+                    byte[] ToWrite = Encoding.ASCII.GetBytes(item);
+                    int aux = ToWrite[0];
+                    string binary = Convert.ToString(aux, 2);
+                    binary = binary.PadLeft(8, '0');
+                    writer.Seek(0, SeekOrigin.End);
+                    writer.Write(ToWrite, 0, 1);
+                } 
                 writer.Write(ByteGenerator.ConvertToBytes("%%%"), 0, 3);
             }
 
@@ -112,16 +111,16 @@ namespace Huffman
             {
                 for (int j = 0; j < output.Count; j++)
                 {
-                    byte[] ToWrite = ConvertToByte(output[j].ToString());
-                    for (int i = 0; i < ToWrite.Length; i++)
-                    {
-                        byte[] temp = { ToWrite[i] };
-                        writer.Seek(0, SeekOrigin.End);
-                        writer.Write(temp, 0, 1);
-                    }
+                    //byte[] ToWrite = Encoding.ASCII.GetBytes(output[j].ToString());                    
+                    string binary = Convert.ToString(output[j], 2);
+                    binary = binary.PadLeft(8, '0');
+                    byte[] sequence = binary.Select(c => Convert.ToByte(c.ToString())).ToArray();                    
+                    writer.Seek(0, SeekOrigin.End);
+                    writer.Write(sequence, 0, sequence.Length);
                 }
             }
 
+            
             double compressedBytes = output.Count;
             double originalBytes = text.Length;
             double rc = compressedBytes / originalBytes;
