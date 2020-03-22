@@ -179,6 +179,7 @@ namespace Huffman
             }
             cont--;
 
+            //empezar a descifrar 
             string outText = "";
             string single = "";
             int oldCode = 0;
@@ -186,17 +187,25 @@ namespace Huffman
             byte[] oldByte = { text[0] };
             oldCode = oldByte[0];
             string caracter = ByteGenerator.ConvertToString(oldByte);
-            outText += single;
-            //empezar a descifrar 
+            outText += previous;
+            
             for (int i = 1; i < text.Length; i++)
             {
                 byte[] byt = { text[i] };
                 newCode = byt[0];                
                 if (!alphabet.Keys.Contains(newCode)) //si el codigo nuevo no está en el diccionario
-                {
+                {                    
                     single = ByteGenerator.ConvertToString(oldByte);
-                    single = single + caracter;
+                    single += caracter;
                 }
+                else
+                {
+                    single = ByteGenerator.ConvertToString(byt);
+                }
+                outText += single;
+                caracter = single[0].ToString();
+                alphabet.Add(byt[0], ByteGenerator.ConvertToString(oldByte) + caracter);
+                oldByte = byt;
             }
 
         }
