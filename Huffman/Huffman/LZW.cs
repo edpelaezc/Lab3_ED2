@@ -158,7 +158,7 @@ namespace Huffman
 
         }
 
-        public void Decompress(byte[] txt) {
+        public void Decompress(byte[] txt, string name) {
             string content = ByteGenerator.ConvertToString(txt);
             string[] archivo = content.Split("@@@");
             byte[] originalDict = ByteGenerator.ConvertToBytes(archivo[0]);
@@ -176,8 +176,7 @@ namespace Huffman
             {
                 alphabet.Add(cont, elements[i]);
                 cont++;
-            }
-            cont--;
+            }            
 
             //empezar a descifrar 
             string outText = "";
@@ -193,7 +192,7 @@ namespace Huffman
             {
                 byte[] byt = { text[i] };
                 newCode = byt[0];                
-                if (!alphabet.Keys.Contains(newCode)) //si el codigo nuevo no está en el diccionario
+                if (!alphabet.ContainsKey(newCode)) //si el codigo nuevo no está en el diccionario
                 {                    
                     single = ByteGenerator.ConvertToString(oldByte);
                     single += caracter;
@@ -204,10 +203,19 @@ namespace Huffman
                 }
                 outText += single;
                 caracter = single[0].ToString();
-                alphabet.Add(byt[0], ByteGenerator.ConvertToString(oldByte) + caracter);
+                alphabet.Add(cont, ByteGenerator.ConvertToString(oldByte) + caracter);
+                cont++;
                 oldByte = byt;
             }
 
+            string folder = @"C:\Decompressions\";
+            string fullpath = folder + name;
+
+            using (FileStream writer = new FileStream(fullpath, FileMode.OpenOrCreate))
+            {                
+                byte[] salida = ByteGenerator.ConvertToBytes(outText);
+                writer.Write(salida, 0, salida.Length);
+            }
         }
 
 
@@ -263,7 +271,6 @@ namespace Huffman
             return ba;
         }
 
-
-
+        
     }
 }

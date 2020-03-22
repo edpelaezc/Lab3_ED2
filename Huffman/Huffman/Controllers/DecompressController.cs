@@ -54,7 +54,7 @@ namespace Huffman.Controllers
             else if (method.ToLower().Equals("lzw"))
             {
                 LZW lzwMethods = new LZW();
-                lzwMethods.Decompress(txt);
+                lzwMethods.Decompress(txt, name);
             }
             
         }
