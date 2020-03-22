@@ -28,10 +28,10 @@ namespace Huffman.Controllers
         }
 
         // POST: api/Decompress/fileName        
-        [HttpPost("{name}")]
-        public void Post([FromForm(Name = "file")] IFormFile file, string name)
-        {
-            Huffman decompressMethod = new Huffman();          
+        [HttpPost("{name}/{method}")]
+        public void Post([FromForm(Name = "file")] IFormFile file, string name, string method)
+        {                     
+
             string folder = @"C:\Compressions\";
             string fullPath = folder + file.FileName;
 
@@ -46,7 +46,17 @@ namespace Huffman.Controllers
                     sum += count;  // sum is a buffer offset for next reading
             }
 
-            decompressMethod.DecodeFile(txt, name, file.FileName);
+            if (method.ToLower().Equals("huffman"))
+            {
+                Huffman huffmanMethods = new Huffman();
+                huffmanMethods.DecodeFile(txt, name, file.FileName);
+            }
+            else if (method.ToLower().Equals("lzw"))
+            {
+                LZW lzwMethods = new LZW();
+                lzwMethods.Decompress(txt);
+            }
+            
         }
 
         // PUT: api/Decompress/5
