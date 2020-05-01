@@ -49,9 +49,11 @@ namespace Huffman.Controllers
             else if (method.ToLower().Equals("lzw"))
             {
                 LZW compressMethods = new LZW();
-                compressMethods.GetText(result);
-                compressMethods.InitializeDictionary(result, name);                
-                compressMethods.Compress(textInBytes, name, file.FileName);
+                //compressMethods.GetText(result);
+                //compressMethods.InitializeDictionary(name);
+                compressMethods.InitializeDictionary(textInBytes, name);
+                //compressMethods.Compress(textInBytes, name, file.FileName);
+                compressMethods.BuildLZW(textInBytes, name, file.FileName);
 
             }
         }
