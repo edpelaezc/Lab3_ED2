@@ -18,44 +18,38 @@ namespace Huffman
         List<long> output = new List<long>();
 
 
-        public void GetText(StringBuilder text) {
+        public void GetText(StringBuilder text)
+        {
             allText = text.ToString();
-            allText = allText.Replace("\r", "");
-            allText = allText.Remove(allText.Length - 1);
+            //allText = allText.Replace("\r", "");
+            //allText = allText.Remove(allText.Length - 1);
         }
 
-        public void InitializeDictionary(StringBuilder text, string newName) {
-            List<string> elements = allText.Select(c => c.ToString()).ToList();
-            elements = elements.Distinct().ToList();
-
-            for (int i = 0; i < elements.Count; i++)
+        public void InitializeDictionary(byte[] text, string newName)
+        {
+            for (int i = 0; i < text.Length; i++)
             {
-                alphabet.Add(cont, elements[i]);
-                cont++;
+                string caracter = ByteGenerator.ConvertToString(new byte[] { text[i] });
+                if (!alphabet.ContainsValue(caracter))
+                {
+                    alphabet.Add(cont, caracter);
+                    cont++;
+                }
             }
-            cont--;
 
             string folder = @"C:\Compressions\";
             string fullPath = folder + newName;
 
-            List<byte> allBytes = new List<byte>();
-
-            for (int j = 0; j < elements.Count; j++)
+            string content = "";
+            foreach (var item in alphabet)
             {
-                byte[] aux = ByteGenerator.ConvertToBytes(elements[j]);
-                int num = aux[0];
-                string binary = Convert.ToString(num, 2);
-                binary = binary.PadLeft(8, '0');
-                byte[] sequence = binary.Select(c => Convert.ToByte(c.ToString())).ToArray();
-                allBytes.AddRange(sequence);
+                KeyValuePair<long, string> pair = item;
+                content += pair.Value;
             }
-                        
 
-            string content = string.Join("", allBytes.ToArray());
-           //escribir diccionario inicial
             using (FileStream writer = new FileStream(fullPath, FileMode.OpenOrCreate))
             {
-                byte[] ToWrite = ConvertToByte(content);
+                byte[] ToWrite = ByteGenerator.ConvertToBytes(content);
                 for (int i = 0; i < ToWrite.Length; i++)
                 {
                     byte[] temp = { ToWrite[i] };
@@ -65,11 +59,60 @@ namespace Huffman
                 writer.Seek(0, SeekOrigin.End);
                 writer.Write(ByteGenerator.ConvertToBytes("@@@"), 0, 3);
             }
-
         }
 
+        public void BuildLZW(byte[] text, string newName, string name)
+        {
+            string folder = @"C:\Compressions\";
+            string fullPath = folder + newName;
+            previous = "";
+            for (int i = 0; i < text.Length; i++)
+            {
+                actual = ByteGenerator.ConvertToString(new byte[] { text[i] });
+                string aux = previous + actual;
 
-        public void Compress(byte[] text, string newName, string name) {
+                if (alphabet.ContainsValue(aux))
+                {
+                    previous += actual;
+                }
+                else
+                {
+                    // imprimir w
+                    List<string> cadenas = alphabet.Values.ToList();
+                    int output = cadenas.IndexOf(previous) + 1;
+                    string binary = Convert.ToString(output, 2);
+                    binary = binary.PadLeft(8, '0');
+                    byte[] ToWrite = ConvertToByte(binary);
+
+                    using (FileStream writer = new FileStream(fullPath, FileMode.Append))
+                    {
+                        writer.WriteByte(ToWrite[0]);
+                    }
+
+                    //agregar wk al diccionario
+                    aux = previous + actual;
+                    alphabet.Add(cont, aux);
+                    cont++;
+
+                    //w = k
+                    previous = actual;
+                }
+            }
+
+            //imprimir codigo de w 
+            List<string> values = alphabet.Values.ToList();
+            int w = values.IndexOf(previous) + 1;
+            string wbinary = Convert.ToString(w, 2);
+            wbinary.PadLeft(8, '0');
+            byte[] Last = ConvertToByte(wbinary);
+
+            using (FileStream writer = new FileStream(fullPath, FileMode.Append))
+            {
+                writer.WriteByte(Last[0]);
+            }
+        }
+        public void Compress(byte[] text, string newName, string name)
+        {
             previous = "";
             for (int i = 0; i < allText.Length; i++)
             {
@@ -103,7 +146,7 @@ namespace Huffman
             }
 
             //imprimir codigo de w 
-            List<string> values = alphabet.Values.ToList();            
+            List<string> values = alphabet.Values.ToList();
             for (int j = 0; j < alphabet.Count; j++)
             {
                 if (values[j] == previous)
@@ -158,53 +201,67 @@ namespace Huffman
 
         }
 
-        public void Decompress(byte[] txt) {
+        public void Decompress(byte[] txt, string name)
+        {
             string content = ByteGenerator.ConvertToString(txt);
             string[] archivo = content.Split("@@@");
             byte[] originalDict = ByteGenerator.ConvertToBytes(archivo[0]);
             byte[] text = ByteGenerator.ConvertToBytes(archivo[1]);
 
+            int TextPosition = originalDict.Length + 3;
+
             //contruir de nuevo el diccionario 
-            List<string> elements = new List<string>();
             for (int i = 0; i < originalDict.Length; i++)
             {
-                elements.Add(((char)originalDict[i]).ToString());
-            }
-
-            cont = 1;
-            for (int i = 0; i < elements.Count; i++)
-            {
-                alphabet.Add(cont, elements[i]);
+                alphabet.Add(cont, ByteGenerator.ConvertToString(new byte[] { originalDict[i] }));
                 cont++;
             }
-            cont--;
 
             //empezar a descifrar 
-            string outText = "";
+            //string outText = "";
+
             string single = "";
-            int oldCode = 0;
             int newCode = 0;
-            byte[] oldByte = { text[0] };
-            oldCode = oldByte[0];
-            string caracter = ByteGenerator.ConvertToString(oldByte);
-            outText += previous;
-            
-            for (int i = 1; i < text.Length; i++)
+            byte[] oldByte = { txt[TextPosition] };
+            TextPosition++;
+            int oldCode = oldByte[0];
+            //string caracter = ByteGenerator.ConvertToString(oldByte);
+            string caracter = alphabet[oldCode];
+
+            string folder = @"C:\Decompressions\";
+            string fullpath = folder + name;
+
+            using (FileStream writer = new FileStream(fullpath, FileMode.OpenOrCreate))
             {
-                byte[] byt = { text[i] };
-                newCode = byt[0];                
-                if (!alphabet.Keys.Contains(newCode)) //si el codigo nuevo no está en el diccionario
-                {                    
-                    single = ByteGenerator.ConvertToString(oldByte);
+                byte[] byt = ByteGenerator.ConvertToBytes(caracter);
+                writer.Write(byt, 0, 1);
+            }
+
+            for (int i = TextPosition; i < txt.Length; i++)
+            {
+                byte[] byt = { txt[i] };
+                newCode = byt[0];
+                if (!alphabet.ContainsKey(newCode)) //si el codigo nuevo no está en el diccionario
+                {
+                    single = alphabet[oldByte[0]];
                     single += caracter;
                 }
                 else
                 {
-                    single = ByteGenerator.ConvertToString(byt);
+                    single = alphabet[byt[0]]; //ByteGenerator.ConvertToString(byt);
                 }
-                outText += single;
+
+                //outText += single;
+                byte[] salida;
+                using (FileStream writer = new FileStream(fullpath, FileMode.Append))
+                {
+                    salida = ByteGenerator.ConvertToBytes(single);
+                    writer.Write(salida, 0, salida.Length);
+                }
+
                 caracter = single[0].ToString();
-                alphabet.Add(byt[0], ByteGenerator.ConvertToString(oldByte) + caracter);
+                alphabet.Add(cont, alphabet[oldByte[0]] + caracter);
+                cont++;
                 oldByte = byt;
             }
 
@@ -262,7 +319,6 @@ namespace Huffman
             BitArray ba = new BitArray(strAllbin.Select(x => x == '1').ToArray());
             return ba;
         }
-
 
 
     }
